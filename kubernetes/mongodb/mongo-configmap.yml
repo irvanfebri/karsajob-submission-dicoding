@@ -1,0 +1,11 @@
+# create a k8s ConfigMap with name 'mongodb-config'
+# and have a data with key 'mongo.conf' and value of multiline string that define one of mongodb config,
+# which is the path of the storage
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-config
+data:
+  mongo.conf: |
+    storage:
+      dbPath: /data/db

@@ -1,0 +1,31 @@
+# Create a k8s PersistentVolume with name 'mongodb-pv-volume'
+# This volume will be used to store the mongodb data
+# This PV is created with some specification, such 2 gigabytes of capacity,
+# could only be mounted by one node (ReadWriteOnce)
+# and the data will be stored in '/mnt/data/mongodb' in host
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongodb-pv-volume
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: '/mnt/data/mongodb'
+---
+#create a k8s pv claim with name 'mongodb-pv-claim'
+#that will search for pv with specification of 2 gigabytes storage, manual storage class, and ReadWriteOnce access mode
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pv-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

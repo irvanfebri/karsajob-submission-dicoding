@@ -1,0 +1,17 @@
+#create a new k8s service with name 'karsajobs-ui' and give it a label 'app: karsajobs'
+# the service type is NodePort that will target port 8000 on pods that have labels 'type: frontend'
+# NodePort will allocate a port in the node, so we could access the application directly by using NODEIP:NODEPORT
+# NODEIP can be retrieved from the minikube ip, meanwhile NODEPORT can be retrieved by describing this service
+# and view its port
+apiVersion: v1
+kind: Service
+metadata:
+  name: karsajobs-ui
+  labels:
+    app: karsajobs
+spec:
+  ports:
+    - port: 8000
+  selector:
+    type: frontend
+  type: NodePort

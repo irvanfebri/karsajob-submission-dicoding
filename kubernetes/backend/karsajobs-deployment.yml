@@ -1,0 +1,46 @@
+# create a k8s deployment with name 'karsajobs-backend' and two labels, which are 'app: karsajobs' and 'type: backend'
+# this deployment will create only 1 replica and each pod will also have two label, which are 'app: karsajobs' and 'type: backend'
+# label 'type:backend' will be used as selector in 'karsajobs-service.yml'
+# this deployment will create pods that contain on container
+# the container will use image from 'ghcr.io/lionelritchie29/karsajobs:latest' will have a name with prefix 'karsajobs-backend-server'
+#the container will expose port 8080 in to the host (pod) and will also map it to port 8080 in the container
+# each container will have some env variables, such as APP_PORT, MONGO_PORT, MONGO_USER, AND MONGO_PASS
+# MONGO_USER and MONGO_PASS is retrieved via Secret, which is defined in 'mongodb/mongo-secret.yml' file
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: karsajobs-backend
+  labels:
+    app: karsajobs
+    type: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: backend
+  template:
+    metadata:
+      labels:
+        app: karsajobs
+        type: backend
+    spec:
+      containers:
+        - name: karsajobs-backend-server
+          image: ghcr.io/irvanfebri/karsajobs:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: APP_PORT
+              value: '8080'
+            - name: MONGO_HOST
+              value: mongodb
+            - name: MONGO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: MONGO_ROOT_USERNAME
+            - name: MONGO_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: MONGO_ROOT_PASSWORD

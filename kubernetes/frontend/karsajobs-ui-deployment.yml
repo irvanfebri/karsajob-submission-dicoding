@@ -1,0 +1,29 @@
+# create a k8s deployment with name 'karsajobs-ui' and two labels, which are 'app: karsajobs' and 'type: frontend'
+# this deployment will create only 1 replica and each pod will also have two label, which are 'app: karsajobs' and 'type: frontend'
+# label 'type:frontend' will be used as selector in 'karsajobs-ui-service.yml'
+# this deployment will create pods that contain on container
+# the container will use image from 'ghcr.io/lionelritchie29/karsajobs-ui:latest' will have a name with prefix 'karsajobs-frontend-app'
+#the container will expose port 8000 in to the host (pod) and will also map it to port 8000 in the container
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: karsajobs-ui
+  labels:
+    app: karsajobs
+    type: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: frontend
+  template:
+    metadata:
+      labels:
+        app: karsajobs
+        type: frontend
+    spec:
+      containers:
+        - name: karsajobs-frontend-app
+          image: ghcr.io/irvanfebri/karsajobs-ui:latest
+          ports:
+            - containerPort: 8000

@@ -1,0 +1,13 @@
+# create a k8s headless service named 'mongodb'
+# that will find port 27017 with pods that have label 'type:db'
+# application could then use 'mongodb' as the host when connecting this service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+spec:
+  ports:
+    - port: 27017
+  selector:
+    type: db
+  clusterIP: None
