@@ -10,7 +10,7 @@ jobs:
       - checkout #checkout from current git repo, source code will be cloned to the container
       - setup_remote_docker #create a remote docker environment, so docker command could be used
       - run: docker pull hadolint/hadolint #install hadolint
-      - run: docker run --rm -i ghcr.io/hadolint/hadolint < karsajobs-ui/Dockerfile #run lint
+      - run: docker run --rm -i ghcr.io/hadolint/hadolint < karsajobs-frontend/Dockerfile #run lint
   # job with name 'lint-frontend-dockerfile' that will use 'cimg/base:stable' image from circle ci
   # this image will use ubuntu image and have git installed
   lint-backend-dockerfile:
