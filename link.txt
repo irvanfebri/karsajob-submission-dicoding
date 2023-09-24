@@ -1,0 +1,9 @@
+Github Repo
+https://github.com/irvanfebri/karsajob-submission-dicoding.git
+
+Package Karsajob-ui 
+docker pull ghcr.io/irvanfebri/karsajobs-ui:latest
+
+
+Package Karsajob
+docker pull ghcr.io/irvanfebri/karsajobs:latest
