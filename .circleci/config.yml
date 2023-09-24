@@ -1,74 +1,56 @@
-version: 2.1 #version of circle ci config file
+version: 2.1
+executors:
+  docker:
+    docker:
+      - image: docker:stable
 
 jobs:
-  # job with name 'lint-frontend-dockerfile' that will use 'cimg/base:stable' image from circle ci
-  # this image will use ubuntu image and have git installed
-  lint-frontend-dockerfile:
-    docker:
-      - image: cimg/base:stable
+  lint-be-dockerfile:
+    executor: docker
     steps:
-      - checkout #checkout from current git repo, source code will be cloned to the container
-      - setup_remote_docker #create a remote docker environment, so docker command could be used
-      - run: docker pull hadolint/hadolint #install hadolint
-      - run: docker run --rm -i ghcr.io/hadolint/hadolint < karsajobs-frontend/Dockerfile #run lint
-  # job with name 'lint-frontend-dockerfile' that will use 'cimg/base:stable' image from circle ci
-  # this image will use ubuntu image and have git installed
-  lint-backend-dockerfile:
-    docker:
-      - image: cimg/base:stable
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Run hadolint
+          command: docker run --rm -i hadolint/hadolint < karsajobs-backend/Dockerfile
+
+  lint-fe-dockerfile:
+    executor: docker
     steps:
-      - checkout #checkout from current git repo, source code will be cloned to the container
-      - setup_remote_docker #create a remote docker environment, so docker command could be used
-      - run: docker pull hadolint/hadolint #install hadolint
-      - run: docker run --rm -i ghcr.io/hadolint/hadolint < karsajobs-backend/Dockerfile #run lint
-  # job with name 'build-app-karsajobs-ui' that will use 'cimg/base:stable' image from circle ci
-  # this image will use ubuntu image and have git installed
-  build-app-karsajobs-ui:
-    docker:
-      - image: cimg/base:stable
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Run hadolint
+          command: docker run --rm -i hadolint/hadolint < karsajobs-frontend/Dockerfile
+
+  build-be-karsajobs:
+    executor: docker
     steps:
-      - checkout #checkout from current git repo, source code will be cloned to the container
-      - setup_remote_docker #create a remote docker environment, so docker command could be used
-      - run: docker build -t irvanfebri/karsajobs-ui:latest ./karsajobs-ui #build the image
-      - run: docker tag irvanfebri/karsajobs-ui:latest ghcr.io/irvanfebri/karsajobs-ui:latest #create new image with new tag using source image
-      - run: echo $GITHUB_TOKEN | docker login ghcr.io -u irvanfebri --password-stdin #login to github
-      - run: docker push ghcr.io/irvanfebri/karsajobs-ui:latest #push the image to github package
-  # job with name 'test-app' that will use 'cimg/go:1.19.3' image from circle ci
-  # this image will use ubuntu image and already have git and go installed
-  test-app:
+      - checkout
+      - setup_remote_docker
+      - run: "cd karsajobs-backend && sh build_push_image_karsajobs.sh"
+
+  build-fe-karsajobs:
+    executor: docker
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: "cd karsajobs-frontend && sh build_push_image_karsajobs_ui.sh"
+
+  test-be-app:
     docker:
       - image: cimg/go:1.19.3
     steps:
-      - checkout #checkout from current git repo, source code will be cloned to the container
-      - run: cd karsajobs-backend && go test -v -short --count=1 $(go list ./...) #run test
-  # job with name 'build-app-karsajobs' that will use 'cimg/base:stable' image from circle ci
-  # this image will use ubuntu image and have git installed
-  build-app-karsajobs:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout #checkout from current git repo, source code will be cloned to the container
-      - setup_remote_docker #create a remote docker environment, so docker command could be used
-      - run: docker build -t irvanfebri/karsajobs:latest ./karsajobs-backend #build the image
-      - run: docker tag irvanfebri/karsajobs:latest ghcr.io/irvanfebri/karsajobs:latest #create new image with new tag using source image
-      - run: echo $GITHUB_TOKEN | docker login ghcr.io -u irvanfebri --password-stdin #login to github
-      - run: docker push ghcr.io/irvanfebri/karsajobs:latest #push the image to github package
+      - checkout
+      - run: cd karsajobs-backend && go test -v -short --count=1 $(go list ./...)
 
 workflows:
-  # frontened workflows, will run two jobs in sequence: lint-frontend-dockerfile and build-app-karsajobs-ui
-  frontend-workflows:
+  karsajobs-backend:
     jobs:
-      - lint-frontend-dockerfile
-      - build-app-karsajobs-ui:
-          requires:
-            - lint-frontend-dockerfile
-  # backend workflows, will run three jobs in sequence: lint-backend-dockerfile, test-app, and build-app-karsajobs
-  backend-workflows:
+      - lint-be-dockerfile
+      - test-be-app
+      - build-be-karsajobs
+  karsajobs-frontend:
     jobs:
-      - lint-backend-dockerfile
-      - test-app:
-          requires:
-            - lint-backend-dockerfile
-      - build-app-karsajobs:
-          requires:
-            - test-app
+      - lint-fe-dockerfile
+      - build-fe-karsajobs
